@@ -18,6 +18,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.servlet.NoHandlerFoundException
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @RestControllerAdvice
 class ApiExceptionHandler {
@@ -27,6 +29,12 @@ class ApiExceptionHandler {
     fun handleInvalidRequest(exception: Exception): ResponseEntity<ApiErrorResponse> {
         logger.debug("Invalid API request. reason={}", exception.message)
         return response(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "요청 값이 올바르지 않습니다.")
+    }
+
+    @ExceptionHandler(NoResourceFoundException::class, NoHandlerFoundException::class)
+    fun handleResourceNotFound(exception: Exception): ResponseEntity<ApiErrorResponse> {
+        logger.debug("Resource not found. reason={}", exception.message)
+        return response(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "요청한 리소스를 찾을 수 없습니다.")
     }
 
     @ExceptionHandler(InvalidSubscriptionTransitionException::class)

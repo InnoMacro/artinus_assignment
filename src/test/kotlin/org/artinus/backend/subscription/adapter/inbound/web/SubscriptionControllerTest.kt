@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -108,6 +109,13 @@ class SubscriptionControllerTest {
             .andExpect(status().isInternalServerError)
             .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"))
             .andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."))
+    }
+
+    @Test
+    fun `존재하지 않는 리소스는 404 오류로 응답한다`() {
+        mockMvc.perform(get("/does-not-exist"))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
     }
 
     private class RecordingSubscribeUseCase : SubscribeUseCase {
