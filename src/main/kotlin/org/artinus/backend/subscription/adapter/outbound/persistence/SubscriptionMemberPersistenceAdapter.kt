@@ -20,6 +20,7 @@ class SubscriptionMemberPersistenceAdapter(
             .selectFrom(member)
             .where(member.phoneNumber.eq(phoneNumber.value))
             .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+            .setHint("jakarta.persistence.lock.timeout", 2_000)
             .fetchOne()
             ?.toDomain()
 

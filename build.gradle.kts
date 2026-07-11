@@ -32,6 +32,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
@@ -53,6 +54,9 @@ dependencies {
 
     // springdoc
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
+
+    // resilience
+    implementation("io.github.resilience4j:resilience4j-spring-boot4:2.4.0")
 
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
