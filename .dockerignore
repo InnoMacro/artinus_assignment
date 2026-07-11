@@ -1,0 +1,15 @@
+.git
+.gitignore
+.gradle
+.idea
+.kotlin
+.agents
+.claude
+.codex
+.omc
+.env
+build
+out
+*.iml
+implementation-plan.html
+goal_document.md

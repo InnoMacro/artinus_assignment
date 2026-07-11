@@ -5,8 +5,8 @@ spring:
     import: optional:file:.env[.properties]
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/subscription?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC}
-    username: ${DB_USERNAME:subscription}
-    password: ${DB_PASSWORD:subscription}
+    username: ${DB_USERNAME:application}
+    password: ${DB_PASSWORD:application}
     hikari:
       connection-timeout: 3000
       maximum-pool-size: 10
@@ -66,3 +66,13 @@ resilience4j:
 logging:
   level:
     org.hibernate.SQL: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
