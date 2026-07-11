@@ -27,8 +27,6 @@ configurations {
     }
 }
 
-extra["springAiVersion"] = "2.0.0"
-
 dependencies {
     // spring basic
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
@@ -44,11 +42,10 @@ dependencies {
     //annotation
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    // spring ai
-    implementation("org.springframework.ai:spring-ai-starter-model-openai")
-
     //database
     runtimeOnly("com.mysql:mysql-connector-j")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    runtimeOnly("org.flywaydb:flyway-mysql")
 
     // querydsl
     implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
@@ -61,16 +58,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-mysql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
-    }
 }
 
 kotlin {
