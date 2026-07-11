@@ -1,11 +1,10 @@
-package org.artinus.backend.common.config
+package org.artinus.backend.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.time.Clock
 
 @Configuration
-class ClockConfiguration {
+class RestClientConfiguration {
     @Bean
-    fun clock(): Clock = Clock.systemUTC()
+    fun restClientFactory(): RestClientFactory = RestClientFactory()
 }

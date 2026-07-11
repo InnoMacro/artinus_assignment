@@ -38,7 +38,7 @@ class QuerydslPersistenceAdapterTest @Autowired constructor(
     }
 
     @Test
-    fun `초기 채널을 QueryDSL로 조회한다`() {
+    fun `초기 채널을 JPA Repository로 조회한다`() {
         val channel = channelRepository.findById(ChannelId(1L))
 
         assertEquals("WEB", channel?.code)
