@@ -2,6 +2,7 @@ package org.artinus.backend.subscription.adapter.outbound.csrng
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.core.IntervalFunction
 import io.github.resilience4j.retry.Retry
 import io.github.resilience4j.retry.RetryConfig
@@ -71,6 +72,20 @@ class CsrngSubscriptionApprovalAdapterTest {
             adapter.requestApproval()
         }
         server.verify()
+    }
+
+    @Test
+    fun `서킷이 열려 있으면 HTTP 호출 없이 즉시 실패한다`() {
+        val circuitBreaker = circuitBreaker()
+        circuitBreaker.transitionToOpenState()
+        val builder = RestClient.builder().baseUrl("https://csrng.test")
+        val unopenedServer = MockRestServiceServer.bindTo(builder).build()
+        val openCircuitAdapter = CsrngSubscriptionApprovalAdapter(builder.build(), retry(), circuitBreaker)
+
+        assertThrows(CallNotPermittedException::class.java) {
+            openCircuitAdapter.requestApproval()
+        }
+        unopenedServer.verify()
     }
 
     private fun retry(): Retry {
