@@ -1,6 +1,7 @@
 package org.artinus.backend.subscription.application.service
 
 import org.artinus.backend.channel.application.port.outbound.ChannelRepository
+import org.artinus.backend.channel.application.exception.ChannelNotFoundException
 import org.artinus.backend.channel.domain.Channel
 import org.artinus.backend.channel.domain.ChannelActionNotAllowedException
 import org.artinus.backend.channel.domain.ChannelId
@@ -9,6 +10,7 @@ import org.artinus.backend.subscription.application.port.outbound.ApprovalDecisi
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionApprovalPort
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistoryRepository
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionMemberRepository
+import org.artinus.backend.subscription.application.exception.SubscriptionMemberNotFoundException
 import org.artinus.backend.subscription.domain.MemberId
 import org.artinus.backend.subscription.domain.PhoneNumber
 import org.artinus.backend.subscription.domain.SubscriptionHistory
@@ -107,6 +109,9 @@ class ChangeSubscriptionServiceTest {
 
         override fun findByPhoneNumberForUpdate(phoneNumber: PhoneNumber): SubscriptionMember? = member
 
+        override fun getByPhoneNumberForUpdate(phoneNumber: PhoneNumber): SubscriptionMember =
+            member ?: throw SubscriptionMemberNotFoundException(phoneNumber)
+
         override fun save(member: SubscriptionMember): SubscriptionMember {
             val savedMember =
                 member.id?.let { member }
@@ -127,7 +132,7 @@ class ChangeSubscriptionServiceTest {
     private class FakeChannelRepository : ChannelRepository {
         var channel: Channel? = Channel(ChannelId(1), "WEB", "홈페이지", true, true)
 
-        override fun findById(id: ChannelId): Channel? = channel
+        override fun getById(id: ChannelId): Channel = channel ?: throw ChannelNotFoundException(id)
     }
 
     private class FakeApprovalPort : SubscriptionApprovalPort {

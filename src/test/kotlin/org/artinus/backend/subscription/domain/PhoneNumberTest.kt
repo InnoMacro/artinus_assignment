@@ -18,4 +18,9 @@ class PhoneNumberTest {
             PhoneNumber("02-123-4567")
         }
     }
+
+    @Test
+    fun `로그를 위한 휴대폰 번호는 가운데 자리를 마스킹한다`() {
+        assertEquals("010****5678", PhoneNumber("01012345678").masked())
+    }
 }

@@ -3,6 +3,7 @@ package org.artinus.backend.subscription.adapter.outbound.persistence
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.LockModeType
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionMemberRepository
+import org.artinus.backend.subscription.application.exception.SubscriptionMemberNotFoundException
 import org.artinus.backend.subscription.domain.PhoneNumber
 import org.artinus.backend.subscription.domain.SubscriptionMember
 import org.springframework.stereotype.Repository
@@ -22,6 +23,10 @@ class SubscriptionMemberPersistenceAdapter(
             .setHint("jakarta.persistence.lock.timeout", 2_000)
             .fetchOne()
             ?.toDomain()
+
+    override fun getByPhoneNumberForUpdate(phoneNumber: PhoneNumber): SubscriptionMember =
+        findByPhoneNumberForUpdate(phoneNumber)
+            ?: throw SubscriptionMemberNotFoundException(phoneNumber)
 
     override fun save(member: SubscriptionMember): SubscriptionMember {
         val entity =

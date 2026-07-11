@@ -29,7 +29,7 @@ class ChangeSubscriptionService(
     UnsubscribeUseCase {
     @Transactional
     override fun subscribe(command: ChangeSubscriptionCommand): ChangeSubscriptionResult {
-        val channel = channelRepository.findById(command.channelId) ?: throw ChannelNotFoundException()
+        val channel = channelRepository.getById(command.channelId)
         channel.requireSubscribable()
 
         val member =
@@ -42,12 +42,10 @@ class ChangeSubscriptionService(
 
     @Transactional
     override fun unsubscribe(command: ChangeSubscriptionCommand): ChangeSubscriptionResult {
-        val channel = channelRepository.findById(command.channelId) ?: throw ChannelNotFoundException()
+        val channel = channelRepository.getById(command.channelId)
         channel.requireUnsubscribable()
 
-        val member =
-            memberRepository.findByPhoneNumberForUpdate(command.phoneNumber)
-                ?: throw SubscriptionMemberNotFoundException()
+        val member = memberRepository.getByPhoneNumberForUpdate(command.phoneNumber)
         val change = member.unsubscribe(command.targetStatus)
 
         return approveAndSave(member, command, change)

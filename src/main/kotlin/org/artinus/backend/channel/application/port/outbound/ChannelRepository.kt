@@ -4,5 +4,5 @@ import org.artinus.backend.channel.domain.Channel
 import org.artinus.backend.channel.domain.ChannelId
 
 interface ChannelRepository {
-    fun findById(id: ChannelId): Channel?
+    fun getById(id: ChannelId): Channel
 }

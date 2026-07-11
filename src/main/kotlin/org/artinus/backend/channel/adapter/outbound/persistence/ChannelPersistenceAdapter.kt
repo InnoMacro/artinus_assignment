@@ -1,6 +1,7 @@
 package org.artinus.backend.channel.adapter.outbound.persistence
 
 import org.artinus.backend.channel.application.port.outbound.ChannelRepository
+import org.artinus.backend.channel.application.exception.ChannelNotFoundException
 import org.artinus.backend.channel.domain.Channel
 import org.artinus.backend.channel.domain.ChannelId
 import org.springframework.stereotype.Repository
@@ -9,8 +10,8 @@ import org.springframework.stereotype.Repository
 class ChannelPersistenceAdapter(
     private val jpaRepository: ChannelJpaRepository,
 ) : ChannelRepository {
-    override fun findById(id: ChannelId): Channel? =
+    override fun getById(id: ChannelId): Channel =
         jpaRepository.findById(id.value)
             .map(ChannelJpaEntity::toDomain)
-            .orElse(null)
+            .orElseThrow { ChannelNotFoundException(id) }
 }

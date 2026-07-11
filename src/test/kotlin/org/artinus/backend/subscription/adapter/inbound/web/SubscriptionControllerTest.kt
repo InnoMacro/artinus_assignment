@@ -1,6 +1,8 @@
 package org.artinus.backend.subscription.adapter.inbound.web
 
 import org.artinus.backend.common.error.ApiExceptionHandler
+import org.artinus.backend.channel.application.exception.ChannelNotFoundException
+import org.artinus.backend.channel.domain.ChannelId
 import org.artinus.backend.subscription.application.port.inbound.SubscribeUseCase
 import org.artinus.backend.subscription.application.port.inbound.UnsubscribeUseCase
 import org.artinus.backend.subscription.application.result.ChangeSubscriptionResult
@@ -76,10 +78,44 @@ class SubscriptionControllerTest {
             .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
     }
 
+    @Test
+    fun `존재하지 않는 채널 ID는 메시지를 포함한 404 오류로 응답한다`() {
+        subscribeUseCase.failure = ChannelNotFoundException(ChannelId(99))
+
+        mockMvc.perform(
+            post("/api/v1/subscriptions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """{"phoneNumber":"01012345678","channelId":99,"targetStatus":"BASIC"}""",
+                ),
+        )
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("$.code").value("CHANNEL_NOT_FOUND"))
+            .andExpect(jsonPath("$.message").value("채널을 찾을 수 없습니다. channelId=99"))
+    }
+
+    @Test
+    fun `예상하지 못한 예외는 상세 내용을 숨긴 500 오류로 응답한다`() {
+        subscribeUseCase.failure = IllegalStateException("내부 상세 정보")
+
+        mockMvc.perform(
+            post("/api/v1/subscriptions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """{"phoneNumber":"01012345678","channelId":1,"targetStatus":"BASIC"}""",
+                ),
+        )
+            .andExpect(status().isInternalServerError)
+            .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"))
+            .andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."))
+    }
+
     private class RecordingSubscribeUseCase : SubscribeUseCase {
         var lastTarget: SubscriptionStatus? = null
+        var failure: RuntimeException? = null
 
         override fun subscribe(command: org.artinus.backend.subscription.application.command.ChangeSubscriptionCommand): ChangeSubscriptionResult {
+            failure?.let { throw it }
             lastTarget = command.targetStatus
             return result(command.targetStatus)
         }
