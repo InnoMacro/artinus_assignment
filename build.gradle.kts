@@ -28,6 +28,8 @@ configurations {
 }
 
 dependencies {
+    implementation(platform("org.springframework.ai:spring-ai-bom:2.0.0"))
+
     // spring basic
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -36,6 +38,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    // ai
+    implementation("org.springframework.ai:spring-ai-starter-model-openai")
 
     // serialize
     runtimeOnly("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
@@ -82,4 +87,5 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    systemProperty("spring.ai.model.chat", "none")
 }

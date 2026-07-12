@@ -1,6 +1,11 @@
 spring:
   application:
     name: backend
+  main:
+    keep-alive: true
+  threads:
+    virtual:
+      enabled: true
   config:
     import: optional:file:.env[.properties]
   datasource:
@@ -26,6 +31,31 @@ spring:
         persistence:
           lock:
             timeout: 2000
+  ai:
+    model:
+      chat: ${AI_CHAT_PROVIDER:none}
+      embedding: none
+      image: none
+      audio:
+        speech: none
+        transcription: none
+      moderation: none
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        timeout: ${SUBSCRIPTION_HISTORY_AI_TIMEOUT:3s}
+        max-retries: ${SUBSCRIPTION_HISTORY_AI_MAX_RETRIES:0}
+
+app:
+  ai:
+    subscription-history-summary:
+      model: ${SUBSCRIPTION_HISTORY_AI_MODEL:gpt-4o-mini}
+      model-profile: ${SUBSCRIPTION_HISTORY_AI_MODEL_PROFILE:STANDARD}
+      temperature: ${SUBSCRIPTION_HISTORY_AI_TEMPERATURE:0.0}
+      max-output-tokens: ${SUBSCRIPTION_HISTORY_AI_MAX_OUTPUT_TOKENS:300}
+      max-history-items: ${SUBSCRIPTION_HISTORY_AI_MAX_HISTORY_ITEMS:100}
+      reasoning-effort: ${SUBSCRIPTION_HISTORY_AI_REASONING_EFFORT:LOW}
+      prompt-cache-key: ${SUBSCRIPTION_HISTORY_AI_PROMPT_CACHE_KEY:subscription-history-summary-v1}
 
 external:
   csrng:
@@ -34,6 +64,12 @@ external:
     read-timeout: ${CSRNG_READ_TIMEOUT:2s}
 
 resilience4j:
+  bulkhead:
+    instances:
+      subscriptionHistoryAi:
+        max-concurrent-calls: ${SUBSCRIPTION_HISTORY_AI_MAX_CONCURRENT_CALLS:8}
+        max-wait-duration: 0ms
+        writable-stack-trace-enabled: false
   retry:
     instances:
       csrng:
@@ -62,6 +98,14 @@ resilience4j:
           - org.artinus.backend.subscription.adapter.outbound.csrng.CsrngUnavailableException
         ignore-exceptions:
           - org.artinus.backend.subscription.adapter.outbound.csrng.CsrngInvalidResponseException
+      subscriptionHistoryAi:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 2
+        automatic-transition-from-open-to-half-open-enabled: true
 
 logging:
   level:
