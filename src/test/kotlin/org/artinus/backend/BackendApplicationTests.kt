@@ -44,6 +44,14 @@ class BackendApplicationTests @Autowired constructor(
     }
 
     @Test
+    fun `이력 요약 기본 모델은 Luna reasoning 프로필이다`() {
+        assertEquals("gpt-5.6-luna", environment.getProperty("app.ai.subscription-history-summary.model"))
+        assertEquals("REASONING", environment.getProperty("app.ai.subscription-history-summary.model-profile"))
+        assertEquals("600", environment.getProperty("app.ai.subscription-history-summary.max-output-tokens"))
+        assertEquals("LOW", environment.getProperty("app.ai.subscription-history-summary.reasoning-effort"))
+    }
+
+    @Test
     fun `테스트 기본 설정에서는 외부 ChatModel을 생성하지 않는다`() {
         assertEquals(null, chatModelProvider.getIfAvailable())
     }

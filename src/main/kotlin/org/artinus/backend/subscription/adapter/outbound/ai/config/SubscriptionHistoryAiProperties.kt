@@ -12,13 +12,13 @@ import org.springframework.validation.annotation.Validated
 @ConfigurationProperties("app.ai.subscription-history-summary")
 data class SubscriptionHistoryAiProperties(
     @field:NotBlank
-    val model: String = "gpt-4o-mini",
-    val modelProfile: SubscriptionHistoryAiModelProfile = SubscriptionHistoryAiModelProfile.STANDARD,
+    val model: String = "gpt-5.6-luna",
+    val modelProfile: SubscriptionHistoryAiModelProfile = SubscriptionHistoryAiModelProfile.REASONING,
     @field:DecimalMin("0.0")
     @field:DecimalMax("2.0")
     val temperature: Double = 0.0,
     @field:Positive
-    val maxOutputTokens: Int = 300,
+    val maxOutputTokens: Int = 600,
     @field:Positive
     val maxHistoryItems: Int = 100,
     val reasoningEffort: SubscriptionHistoryAiReasoningEffort = SubscriptionHistoryAiReasoningEffort.LOW,

@@ -10,6 +10,16 @@ import org.springframework.boot.context.properties.source.MapConfigurationProper
 
 class SubscriptionHistoryAiPropertiesBindingTest {
     @Test
+    fun `기본 설정은 Luna reasoning 프로필을 사용한다`() {
+        val properties = SubscriptionHistoryAiProperties()
+
+        assertEquals("gpt-5.6-luna", properties.model)
+        assertEquals(SubscriptionHistoryAiModelProfile.REASONING, properties.modelProfile)
+        assertEquals(600, properties.maxOutputTokens)
+        assertEquals(SubscriptionHistoryAiReasoningEffort.LOW, properties.reasoningEffort)
+    }
+
+    @Test
     fun `reasoning 모델 프로필과 옵션을 외부 설정에서 바인딩한다`() {
         val source =
             MapConfigurationPropertySource(
@@ -42,7 +52,7 @@ class SubscriptionHistoryAiPropertiesBindingTest {
         val violations =
             validator.validate(
                 SubscriptionHistoryAiProperties(
-                    model = "gpt-5-mini",
+                    model = "gpt-5.6-luna",
                     modelProfile = SubscriptionHistoryAiModelProfile.STANDARD,
                 ),
             )
@@ -61,6 +71,10 @@ class SubscriptionHistoryAiPropertiesBindingTest {
                 ),
                 SubscriptionHistoryAiProperties(
                     model = "gpt-5-mini",
+                    modelProfile = SubscriptionHistoryAiModelProfile.REASONING,
+                ),
+                SubscriptionHistoryAiProperties(
+                    model = "gpt-5.6-luna",
                     modelProfile = SubscriptionHistoryAiModelProfile.REASONING,
                 ),
             )

@@ -4,7 +4,7 @@ enum class SubscriptionHistoryAiModelProfile(
     private vararg val supportedModelPrefixes: String,
 ) {
     STANDARD("gpt-4o-mini"),
-    REASONING("gpt-5-mini"),
+    REASONING("gpt-5-mini", "gpt-5.6-luna"),
     ;
 
     fun supports(model: String): Boolean =

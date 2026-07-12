@@ -5,6 +5,7 @@ import io.github.resilience4j.bulkhead.BulkheadConfig
 import io.github.resilience4j.bulkhead.BulkheadFullException
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
+import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiModelProfile
 import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiProperties
 import org.artinus.backend.subscription.adapter.outbound.ai.prompt.SubscriptionHistoryPrompt
 import org.artinus.backend.subscription.application.exception.SubscriptionHistorySummaryUnavailableException
@@ -38,6 +39,7 @@ class SpringAiSubscriptionHistorySummarizerTest {
                 properties =
                     SubscriptionHistoryAiProperties(
                         model = "gpt-4o-mini",
+                        modelProfile = SubscriptionHistoryAiModelProfile.STANDARD,
                         temperature = 0.0,
                         maxOutputTokens = 300,
                         promptCacheKey = "subscription-history-summary-v1",

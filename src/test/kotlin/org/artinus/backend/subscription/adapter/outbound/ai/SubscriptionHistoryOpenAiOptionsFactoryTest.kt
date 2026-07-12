@@ -9,6 +9,21 @@ import org.junit.jupiter.api.Test
 
 class SubscriptionHistoryOpenAiOptionsFactoryTest {
     @Test
+    fun `기본 Luna 프로필은 reasoning 옵션만 사용한다`() {
+        val options =
+            SubscriptionHistoryOpenAiOptionsFactory(
+                SubscriptionHistoryAiProperties(),
+            ).create().build()
+
+        assertEquals("gpt-5.6-luna", options.model)
+        assertNull(options.temperature)
+        assertNull(options.maxTokens)
+        assertEquals(600, options.maxCompletionTokens)
+        assertEquals("low", options.reasoningEffort)
+        assertEquals("subscription-history-summary-v1", options.promptCacheKey)
+    }
+
+    @Test
     fun `standard 프로필은 temperature와 max tokens를 사용한다`() {
         val options =
             SubscriptionHistoryOpenAiOptionsFactory(

@@ -49,10 +49,10 @@ spring:
 app:
   ai:
     subscription-history-summary:
-      model: ${SUBSCRIPTION_HISTORY_AI_MODEL:gpt-4o-mini}
-      model-profile: ${SUBSCRIPTION_HISTORY_AI_MODEL_PROFILE:STANDARD}
+      model: ${SUBSCRIPTION_HISTORY_AI_MODEL:gpt-5.6-luna}
+      model-profile: ${SUBSCRIPTION_HISTORY_AI_MODEL_PROFILE:REASONING}
       temperature: ${SUBSCRIPTION_HISTORY_AI_TEMPERATURE:0.0}
-      max-output-tokens: ${SUBSCRIPTION_HISTORY_AI_MAX_OUTPUT_TOKENS:300}
+      max-output-tokens: ${SUBSCRIPTION_HISTORY_AI_MAX_OUTPUT_TOKENS:600}
       max-history-items: ${SUBSCRIPTION_HISTORY_AI_MAX_HISTORY_ITEMS:100}
       reasoning-effort: ${SUBSCRIPTION_HISTORY_AI_REASONING_EFFORT:LOW}
       prompt-cache-key: ${SUBSCRIPTION_HISTORY_AI_PROMPT_CACHE_KEY:subscription-history-summary-v1}
