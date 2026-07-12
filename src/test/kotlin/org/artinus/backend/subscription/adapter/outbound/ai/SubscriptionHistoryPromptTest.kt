@@ -1,8 +1,8 @@
 package org.artinus.backend.subscription.adapter.outbound.ai
 
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
-import org.artinus.backend.subscription.domain.SubscriptionAction
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

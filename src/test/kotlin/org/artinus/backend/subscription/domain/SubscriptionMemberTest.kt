@@ -1,5 +1,9 @@
 package org.artinus.backend.subscription.domain
 
+import org.artinus.backend.subscription.domain.vo.MemberId
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

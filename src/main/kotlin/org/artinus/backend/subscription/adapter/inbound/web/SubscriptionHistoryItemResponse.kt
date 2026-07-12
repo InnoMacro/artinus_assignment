@@ -1,8 +1,8 @@
 package org.artinus.backend.subscription.adapter.inbound.web
 
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
-import org.artinus.backend.subscription.domain.SubscriptionAction
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import java.time.OffsetDateTime
 import java.time.ZoneId
 

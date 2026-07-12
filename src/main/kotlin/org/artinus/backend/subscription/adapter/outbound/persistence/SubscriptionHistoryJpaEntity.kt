@@ -8,10 +8,10 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.artinus.backend.channel.domain.ChannelId
-import org.artinus.backend.subscription.domain.MemberId
-import org.artinus.backend.subscription.domain.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.MemberId
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
 import org.artinus.backend.subscription.domain.SubscriptionHistory
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import java.time.Instant
 
 @Entity

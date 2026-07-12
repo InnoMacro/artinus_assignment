@@ -7,8 +7,8 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
 import org.artinus.backend.subscription.application.exception.SubscriptionHistorySummaryUnavailableException
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
-import org.artinus.backend.subscription.domain.SubscriptionAction
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows

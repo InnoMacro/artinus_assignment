@@ -9,6 +9,7 @@ import org.artinus.backend.subscription.application.port.outbound.ApprovalDecisi
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionApprovalPort
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistorySummarizer
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,48 +54,80 @@ class SubscriptionApiIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     fun `구독 후 해지 API를 호출하면 현재 상태와 이력이 함께 변경된다`() {
-        performChange("/api/v1/subscriptions", "BASIC")
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("BASIC"))
+        val phoneNumber = "01011112222"
 
-        performChange("/api/v1/subscriptions/unsubscribe", "NONE")
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("NONE"))
+        try {
+            cleanup(phoneNumber)
+            performChange("/api/v1/subscriptions", "BASIC", phoneNumber)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.status").value("BASIC"))
 
-        entityManager.flush()
-        val queryFactory = JPAQueryFactory(entityManager)
-        val member = QSubscriptionMemberJpaEntity.subscriptionMemberJpaEntity
-        val history = QSubscriptionHistoryJpaEntity.subscriptionHistoryJpaEntity
+            performChange("/api/v1/subscriptions/unsubscribe", "NONE", phoneNumber)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.status").value("NONE"))
 
-        assertEquals(
-            0.toByte(),
-            queryFactory.select(member.status).from(member)
-                .where(member.phoneNumber.eq("01012345678"))
-                .fetchOne()
-                ?.dbCode,
-        )
-        assertEquals(
-            2L,
-            queryFactory.select(history.count()).from(history).fetchOne(),
-        )
+            val queryFactory = JPAQueryFactory(entityManager)
+            val member = QSubscriptionMemberJpaEntity.subscriptionMemberJpaEntity
+            val history = QSubscriptionHistoryJpaEntity.subscriptionHistoryJpaEntity
+            val memberId =
+                requireNotNull(
+                    queryFactory.select(member.id).from(member)
+                        .where(member.phoneNumber.eq(phoneNumber))
+                        .fetchOne(),
+                )
+
+            assertEquals(
+                SubscriptionStatus.NONE,
+                queryFactory.select(member.status).from(member)
+                    .where(member.id.eq(memberId))
+                    .fetchOne(),
+            )
+            assertEquals(
+                2L,
+                queryFactory.select(history.count()).from(history)
+                    .where(history.memberId.eq(memberId))
+                    .fetchOne(),
+            )
+        } finally {
+            cleanup(phoneNumber)
+        }
     }
 
     @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     fun `csrng 거절 시 422를 반환하고 회원과 이력을 저장하지 않는다`() {
+        val phoneNumber = "01011113333"
         approvalPort.decision = ApprovalDecision.REJECTED
 
-        performChange("/api/v1/subscriptions", "PREMIUM")
-            .andExpect(status().isUnprocessableContent)
-            .andExpect(jsonPath("$.code").value("CSRNG_REJECTED"))
+        try {
+            cleanup(phoneNumber)
+            performChange("/api/v1/subscriptions", "PREMIUM", phoneNumber)
+                .andExpect(status().isUnprocessableContent)
+                .andExpect(jsonPath("$.code").value("CSRNG_REJECTED"))
 
-        entityManager.flush()
-        val queryFactory = JPAQueryFactory(entityManager)
-        val member = QSubscriptionMemberJpaEntity.subscriptionMemberJpaEntity
-        val history = QSubscriptionHistoryJpaEntity.subscriptionHistoryJpaEntity
+            val queryFactory = JPAQueryFactory(entityManager)
+            val member = QSubscriptionMemberJpaEntity.subscriptionMemberJpaEntity
 
-        assertEquals(0L, queryFactory.select(member.count()).from(member).fetchOne())
-        assertEquals(0L, queryFactory.select(history.count()).from(history).fetchOne())
+            assertEquals(0L, queryFactory.select(member.count()).from(member)
+                .where(member.phoneNumber.eq(phoneNumber)).fetchOne())
+            assertEquals(
+                0L,
+                jdbcTemplate.queryForObject(
+                    """
+                    SELECT COUNT(*)
+                    FROM subscription_history h
+                    JOIN subscription_member m ON m.id = h.member_id
+                    WHERE m.phone_number = ?
+                    """.trimIndent(),
+                    Long::class.java,
+                    phoneNumber,
+                ),
+            )
+        } finally {
+            cleanup(phoneNumber)
+        }
     }
 
     @Test

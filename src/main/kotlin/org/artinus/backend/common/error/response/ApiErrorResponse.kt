@@ -1,4 +1,4 @@
-package org.artinus.backend.common.error
+package org.artinus.backend.common.error.response
 
 import java.time.Instant
 

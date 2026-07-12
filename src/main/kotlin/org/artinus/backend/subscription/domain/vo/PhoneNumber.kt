@@ -1,4 +1,6 @@
-package org.artinus.backend.subscription.domain
+package org.artinus.backend.subscription.domain.vo
+
+import org.artinus.backend.subscription.domain.exception.InvalidPhoneNumberException
 
 @JvmInline
 value class PhoneNumber private constructor(val value: String) {

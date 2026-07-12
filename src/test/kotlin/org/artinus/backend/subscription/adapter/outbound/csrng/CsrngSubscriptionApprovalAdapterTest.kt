@@ -6,9 +6,12 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.core.IntervalFunction
 import io.github.resilience4j.retry.Retry
 import io.github.resilience4j.retry.RetryConfig
+import org.artinus.backend.subscription.application.exception.SubscriptionApprovalInvalidResponseException
+import org.artinus.backend.subscription.application.exception.SubscriptionApprovalUnavailableException
 import org.artinus.backend.subscription.application.port.outbound.ApprovalDecision
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
@@ -25,12 +28,14 @@ import java.time.Duration
 class CsrngSubscriptionApprovalAdapterTest {
     private lateinit var server: MockRestServiceServer
     private lateinit var adapter: CsrngSubscriptionApprovalAdapter
+    private lateinit var circuitBreaker: CircuitBreaker
 
     @BeforeEach
     fun setUp() {
         val builder = RestClient.builder().baseUrl("https://csrng.test")
         server = MockRestServiceServer.bindTo(builder).build()
-        adapter = CsrngSubscriptionApprovalAdapter(builder.build(), retry(), circuitBreaker())
+        circuitBreaker = createCircuitBreaker()
+        adapter = CsrngSubscriptionApprovalAdapter(builder.build(), retry(), circuitBreaker)
     }
 
     @Test
@@ -40,6 +45,8 @@ class CsrngSubscriptionApprovalAdapterTest {
             .andRespond(withSuccess("""[{"status":"success","random":1}]""", MediaType.APPLICATION_JSON))
 
         assertEquals(ApprovalDecision.APPROVED, adapter.requestApproval())
+        assertEquals(1, circuitBreaker.metrics.numberOfSuccessfulCalls)
+        assertEquals(0, circuitBreaker.metrics.numberOfFailedCalls)
         server.verify()
     }
 
@@ -60,6 +67,8 @@ class CsrngSubscriptionApprovalAdapterTest {
             .andRespond(withSuccess("""[{"status":"success","random":1}]""", MediaType.APPLICATION_JSON))
 
         assertEquals(ApprovalDecision.APPROVED, adapter.requestApproval())
+        assertEquals(1, circuitBreaker.metrics.numberOfSuccessfulCalls)
+        assertEquals(0, circuitBreaker.metrics.numberOfFailedCalls)
         server.verify()
     }
 
@@ -68,24 +77,77 @@ class CsrngSubscriptionApprovalAdapterTest {
         server.expect(ExpectedCount.once(), requestTo("https://csrng.test/csrng/csrng.php?min=0&max=1"))
             .andRespond(withSuccess("""[{"status":"success","random":9}]""", MediaType.APPLICATION_JSON))
 
-        assertThrows(CsrngInvalidResponseException::class.java) {
-            adapter.requestApproval()
-        }
+        val exception =
+            assertThrows(SubscriptionApprovalInvalidResponseException::class.java) {
+                adapter.requestApproval()
+            }
+        assertTrue(exception.cause is CsrngInvalidResponseException)
+        assertEquals(0, circuitBreaker.metrics.numberOfFailedCalls)
+        server.verify()
+    }
+
+    @Test
+    fun `JSON 형식이 잘못된 응답은 application 승인 응답 오류로 정규화한다`() {
+        server.expect(ExpectedCount.once(), requestTo("https://csrng.test/csrng/csrng.php?min=0&max=1"))
+            .andRespond(withSuccess("""[{"status":"success","random":1}""", MediaType.APPLICATION_JSON))
+
+        val exception =
+            assertThrows(SubscriptionApprovalInvalidResponseException::class.java) {
+                adapter.requestApproval()
+            }
+
+        assertTrue(exception.cause is CsrngInvalidResponseException)
+        assertEquals(0, circuitBreaker.metrics.numberOfFailedCalls)
+        server.verify()
+    }
+
+    @Test
+    fun `5xx 재시도를 모두 소진하면 application 승인 장애로 정규화한다`() {
+        server.expect(ExpectedCount.twice(), requestTo("https://csrng.test/csrng/csrng.php?min=0&max=1"))
+            .andRespond(withServerError())
+
+        val exception =
+            assertThrows(SubscriptionApprovalUnavailableException::class.java) {
+                adapter.requestApproval()
+            }
+
+        assertTrue(exception.cause is CsrngUnavailableException)
+        assertEquals(1, circuitBreaker.metrics.numberOfFailedCalls)
         server.verify()
     }
 
     @Test
     fun `서킷이 열려 있으면 HTTP 호출 없이 즉시 실패한다`() {
-        val circuitBreaker = circuitBreaker()
+        val circuitBreaker = createCircuitBreaker()
         circuitBreaker.transitionToOpenState()
         val builder = RestClient.builder().baseUrl("https://csrng.test")
         val unopenedServer = MockRestServiceServer.bindTo(builder).build()
         val openCircuitAdapter = CsrngSubscriptionApprovalAdapter(builder.build(), retry(), circuitBreaker)
 
-        assertThrows(CallNotPermittedException::class.java) {
-            openCircuitAdapter.requestApproval()
-        }
+        val exception =
+            assertThrows(SubscriptionApprovalUnavailableException::class.java) {
+                openCircuitAdapter.requestApproval()
+            }
+        assertTrue(exception.cause is CallNotPermittedException)
         unopenedServer.verify()
+    }
+
+    @Test
+    fun `예상하지 못한 런타임 예외는 승인 장애로 숨기지 않는다`() {
+        val unexpected = IllegalStateException("unexpected client failure")
+        val restClient =
+            RestClient.builder()
+                .baseUrl("https://csrng.test")
+                .requestInterceptor { _, _, _ -> throw unexpected }
+                .build()
+        val unexpectedFailureAdapter = CsrngSubscriptionApprovalAdapter(restClient, retry(), createCircuitBreaker())
+
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                unexpectedFailureAdapter.requestApproval()
+            }
+
+        assertEquals(unexpected, exception)
     }
 
     private fun retry(): Retry {
@@ -98,7 +160,7 @@ class CsrngSubscriptionApprovalAdapterTest {
         return Retry.of("csrng-test", config)
     }
 
-    private fun circuitBreaker(): CircuitBreaker {
+    private fun createCircuitBreaker(): CircuitBreaker {
         val config =
             CircuitBreakerConfig.custom()
                 .slidingWindowSize(10)

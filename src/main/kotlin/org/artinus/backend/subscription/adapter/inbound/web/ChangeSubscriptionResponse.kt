@@ -1,7 +1,7 @@
 package org.artinus.backend.subscription.adapter.inbound.web
 
 import org.artinus.backend.subscription.application.result.ChangeSubscriptionResult
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 
 data class ChangeSubscriptionResponse(
     val memberId: Long,

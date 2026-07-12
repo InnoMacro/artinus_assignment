@@ -6,8 +6,8 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Positive
 import org.artinus.backend.channel.domain.ChannelId
 import org.artinus.backend.subscription.application.command.ChangeSubscriptionCommand
-import org.artinus.backend.subscription.domain.PhoneNumber
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 
 data class ChangeSubscriptionRequest(
     @field:NotBlank(message = "휴대폰 번호는 필수입니다.")

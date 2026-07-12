@@ -1,5 +1,9 @@
 package org.artinus.backend.subscription.domain
 
+import org.artinus.backend.subscription.domain.exception.InvalidSubscriptionTransitionException
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
+
 object SubscriptionStateMachine {
     private data class TransitionKey(
         val current: SubscriptionStatus,

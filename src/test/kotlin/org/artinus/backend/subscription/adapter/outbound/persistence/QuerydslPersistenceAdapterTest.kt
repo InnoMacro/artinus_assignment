@@ -8,14 +8,16 @@ import org.artinus.backend.subscription.application.exception.SubscriptionMember
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistoryQueryPort
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistoryRepository
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionMemberRepository
-import org.artinus.backend.subscription.domain.MemberId
-import org.artinus.backend.subscription.domain.PhoneNumber
-import org.artinus.backend.subscription.domain.SubscriptionAction
+import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
+import org.artinus.backend.subscription.domain.vo.MemberId
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
 import org.artinus.backend.subscription.domain.SubscriptionHistory
 import org.artinus.backend.subscription.domain.SubscriptionMember
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -73,7 +75,7 @@ class QuerydslPersistenceAdapterTest @Autowired constructor(
         entityManager.flush()
         entityManager.clear()
 
-        val result = historyQueryPort.findAllByPhoneNumber(PhoneNumber("010-1234-5678"))
+        val result = requireNotNull(historyQueryPort.findAllByPhoneNumber(PhoneNumber("010-1234-5678")))
 
         assertEquals(listOf("홈페이지", "모바일앱"), result.map { it.channelName })
         assertEquals(
@@ -83,10 +85,33 @@ class QuerydslPersistenceAdapterTest @Autowired constructor(
     }
 
     @Test
-    fun `이력 조회 대상 회원이 없으면 회원 없음 예외를 발생시킨다`() {
-        org.junit.jupiter.api.Assertions.assertThrows(SubscriptionMemberNotFoundException::class.java) {
-            historyQueryPort.findAllByPhoneNumber(PhoneNumber("01099998888"))
-        }
+    fun `동일한 변경 시각의 이력은 id 오름차순으로 조회한다`() {
+        val member = memberRepository.save(SubscriptionMember.new(PhoneNumber("01012345678")))
+        val memberId = requireNotNull(member.id)
+        val first = historyRepository.save(history(memberId, channelId = 2, changedAt = "2026-01-01T12:00:00Z"))
+        val second = historyRepository.save(history(memberId, channelId = 1, changedAt = "2026-01-01T12:00:00Z"))
+        entityManager.flush()
+        entityManager.clear()
+
+        val result = requireNotNull(historyQueryPort.findAllByPhoneNumber(PhoneNumber("01012345678")))
+
+        assertEquals(listOf(first.id, second.id), result.map(SubscriptionHistoryItem::id))
+    }
+
+    @Test
+    fun `이력 조회 대상 회원이 없으면 null을 반환한다`() {
+        assertNull(historyQueryPort.findAllByPhoneNumber(PhoneNumber("01099998888")))
+    }
+
+    @Test
+    fun `회원은 있지만 변경 이력이 없으면 빈 목록을 반환한다`() {
+        memberRepository.save(SubscriptionMember.new(PhoneNumber("01012345678")))
+        entityManager.flush()
+        entityManager.clear()
+
+        val result = historyQueryPort.findAllByPhoneNumber(PhoneNumber("01012345678"))
+
+        assertEquals(emptyList<SubscriptionHistoryItem>(), result)
     }
 
     private fun history(

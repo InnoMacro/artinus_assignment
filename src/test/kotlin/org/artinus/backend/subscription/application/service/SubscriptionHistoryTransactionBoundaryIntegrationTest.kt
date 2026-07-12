@@ -5,9 +5,9 @@ import org.artinus.backend.subscription.application.port.inbound.GetSubscription
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistoryQueryPort
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistorySummarizer
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
-import org.artinus.backend.subscription.domain.PhoneNumber
-import org.artinus.backend.subscription.domain.SubscriptionAction
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -2,10 +2,9 @@ package org.artinus.backend.subscription.adapter.outbound.persistence
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.artinus.backend.channel.adapter.outbound.persistence.QChannelJpaEntity
-import org.artinus.backend.subscription.application.exception.SubscriptionMemberNotFoundException
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistoryQueryPort
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
-import org.artinus.backend.subscription.domain.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,13 +17,13 @@ class SubscriptionHistoryQueryAdapter(
     private val channel = QChannelJpaEntity.channelJpaEntity
 
     @Transactional(readOnly = true)
-    override fun findAllByPhoneNumber(phoneNumber: PhoneNumber): List<SubscriptionHistoryItem> {
+    override fun findAllByPhoneNumber(phoneNumber: PhoneNumber): List<SubscriptionHistoryItem>? {
         val memberId =
             queryFactory.select(member.id)
                 .from(member)
                 .where(member.phoneNumber.eq(phoneNumber.value))
                 .fetchOne()
-                ?: throw SubscriptionMemberNotFoundException(phoneNumber)
+                ?: return null
 
         return queryFactory
             .select(history, channel.name)

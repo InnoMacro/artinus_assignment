@@ -4,7 +4,7 @@ import jakarta.validation.Valid
 import org.artinus.backend.subscription.application.port.inbound.GetSubscriptionHistoryUseCase
 import org.artinus.backend.subscription.application.port.inbound.SubscribeUseCase
 import org.artinus.backend.subscription.application.port.inbound.UnsubscribeUseCase
-import org.artinus.backend.subscription.domain.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

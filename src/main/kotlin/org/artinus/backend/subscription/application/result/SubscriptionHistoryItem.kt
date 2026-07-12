@@ -1,7 +1,7 @@
 package org.artinus.backend.subscription.application.result
 
-import org.artinus.backend.subscription.domain.SubscriptionAction
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import java.time.Instant
 
 data class SubscriptionHistoryItem(

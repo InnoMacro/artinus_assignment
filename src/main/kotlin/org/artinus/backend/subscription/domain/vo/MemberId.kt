@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.domain
+package org.artinus.backend.subscription.domain.vo
 
 @JvmInline
 value class MemberId(val value: Long) {
