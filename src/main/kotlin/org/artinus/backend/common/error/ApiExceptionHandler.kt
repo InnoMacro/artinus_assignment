@@ -8,6 +8,7 @@ import org.artinus.backend.subscription.adapter.outbound.csrng.CsrngInvalidRespo
 import org.artinus.backend.subscription.adapter.outbound.csrng.CsrngUnavailableException
 import org.artinus.backend.subscription.application.exception.SubscriptionMemberNotFoundException
 import org.artinus.backend.subscription.application.service.SubscriptionApprovalRejectedException
+import org.artinus.backend.subscription.domain.InvalidPhoneNumberException
 import org.artinus.backend.subscription.domain.InvalidSubscriptionTransitionException
 import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.DataIntegrityViolationException
@@ -29,6 +30,12 @@ class ApiExceptionHandler {
     fun handleInvalidRequest(exception: Exception): ResponseEntity<ApiErrorResponse> {
         logger.debug("Invalid API request. reason={}", exception.message)
         return response(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "요청 값이 올바르지 않습니다.")
+    }
+
+    @ExceptionHandler(InvalidPhoneNumberException::class)
+    fun handleInvalidPhoneNumber(exception: InvalidPhoneNumberException): ResponseEntity<ApiErrorResponse> {
+        logger.debug("Invalid phone number request")
+        return response(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", exception.message)
     }
 
     @ExceptionHandler(NoResourceFoundException::class, NoHandlerFoundException::class)
