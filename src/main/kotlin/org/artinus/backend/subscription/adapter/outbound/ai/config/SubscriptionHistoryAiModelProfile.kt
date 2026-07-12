@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.adapter.outbound.ai
+package org.artinus.backend.subscription.adapter.outbound.ai.config
 
 enum class SubscriptionHistoryAiModelProfile(
     private vararg val supportedModelPrefixes: String,

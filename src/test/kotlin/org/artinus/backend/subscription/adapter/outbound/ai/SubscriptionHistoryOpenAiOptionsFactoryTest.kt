@@ -1,5 +1,8 @@
 package org.artinus.backend.subscription.adapter.outbound.ai
 
+import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiModelProfile
+import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiProperties
+import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiReasoningEffort
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

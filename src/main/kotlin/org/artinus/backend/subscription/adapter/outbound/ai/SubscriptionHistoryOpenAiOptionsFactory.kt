@@ -1,5 +1,7 @@
 package org.artinus.backend.subscription.adapter.outbound.ai
 
+import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiModelProfile
+import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiProperties
 import org.springframework.ai.openai.OpenAiChatOptions
 
 class SubscriptionHistoryOpenAiOptionsFactory(

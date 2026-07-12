@@ -1,6 +1,9 @@
 package org.artinus.backend.subscription.adapter.inbound.web
 
 import jakarta.validation.Valid
+import org.artinus.backend.subscription.adapter.inbound.web.request.ChangeSubscriptionRequest
+import org.artinus.backend.subscription.adapter.inbound.web.response.ChangeSubscriptionResponse
+import org.artinus.backend.subscription.adapter.inbound.web.response.SubscriptionHistoryResponse
 import org.artinus.backend.subscription.application.port.inbound.GetSubscriptionHistoryUseCase
 import org.artinus.backend.subscription.application.port.inbound.SubscribeUseCase
 import org.artinus.backend.subscription.application.port.inbound.UnsubscribeUseCase

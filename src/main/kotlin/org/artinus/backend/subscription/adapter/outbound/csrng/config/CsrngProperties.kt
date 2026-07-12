@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.adapter.outbound.csrng
+package org.artinus.backend.subscription.adapter.outbound.csrng.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import java.time.Duration

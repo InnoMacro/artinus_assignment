@@ -6,6 +6,8 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.core.IntervalFunction
 import io.github.resilience4j.retry.Retry
 import io.github.resilience4j.retry.RetryConfig
+import org.artinus.backend.subscription.adapter.outbound.csrng.exception.CsrngInvalidResponseException
+import org.artinus.backend.subscription.adapter.outbound.csrng.exception.CsrngUnavailableException
 import org.artinus.backend.subscription.application.exception.SubscriptionApprovalInvalidResponseException
 import org.artinus.backend.subscription.application.exception.SubscriptionApprovalUnavailableException
 import org.artinus.backend.subscription.application.port.outbound.ApprovalDecision

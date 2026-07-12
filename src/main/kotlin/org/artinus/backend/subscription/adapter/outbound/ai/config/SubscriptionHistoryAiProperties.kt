@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.adapter.outbound.ai
+package org.artinus.backend.subscription.adapter.outbound.ai.config
 
 import jakarta.validation.constraints.AssertTrue
 import jakarta.validation.constraints.DecimalMax

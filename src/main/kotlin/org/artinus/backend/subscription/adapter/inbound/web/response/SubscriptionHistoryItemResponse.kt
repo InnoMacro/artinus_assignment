@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.adapter.inbound.web
+package org.artinus.backend.subscription.adapter.inbound.web.response
 
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
 import org.artinus.backend.subscription.domain.vo.SubscriptionAction

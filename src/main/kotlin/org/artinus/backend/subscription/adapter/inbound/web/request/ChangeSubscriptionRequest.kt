@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.adapter.inbound.web
+package org.artinus.backend.subscription.adapter.inbound.web.request
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull

@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.adapter.outbound.ai
+package org.artinus.backend.subscription.adapter.outbound.ai.prompt
 
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
 import org.artinus.backend.subscription.domain.vo.SubscriptionAction

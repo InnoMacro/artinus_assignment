@@ -1,7 +1,8 @@
-package org.artinus.backend.subscription.adapter.outbound.ai
+package org.artinus.backend.subscription.adapter.outbound.ai.config
 
 import io.github.resilience4j.bulkhead.BulkheadRegistry
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
+import org.artinus.backend.subscription.adapter.outbound.ai.prompt.SubscriptionHistoryPrompt
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistorySummarizer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

@@ -1,9 +1,11 @@
-package org.artinus.backend.subscription.adapter.outbound.ai
+package org.artinus.backend.subscription.adapter.outbound.ai.config
 
 import io.github.resilience4j.bulkhead.Bulkhead
 import io.github.resilience4j.bulkhead.BulkheadRegistry
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
+import org.artinus.backend.subscription.adapter.outbound.ai.SpringAiSubscriptionHistorySummarizer
+import org.artinus.backend.subscription.adapter.outbound.ai.prompt.SubscriptionHistoryPrompt
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistorySummarizer
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.model.ChatModel

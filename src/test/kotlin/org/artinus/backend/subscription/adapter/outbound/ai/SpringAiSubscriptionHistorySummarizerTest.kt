@@ -5,6 +5,8 @@ import io.github.resilience4j.bulkhead.BulkheadConfig
 import io.github.resilience4j.bulkhead.BulkheadFullException
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
+import org.artinus.backend.subscription.adapter.outbound.ai.config.SubscriptionHistoryAiProperties
+import org.artinus.backend.subscription.adapter.outbound.ai.prompt.SubscriptionHistoryPrompt
 import org.artinus.backend.subscription.application.exception.SubscriptionHistorySummaryUnavailableException
 import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
 import org.artinus.backend.subscription.domain.vo.SubscriptionAction

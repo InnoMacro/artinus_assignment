@@ -1,11 +1,10 @@
-package org.artinus.backend.subscription.adapter.outbound.csrng
+package org.artinus.backend.subscription.adapter.outbound.csrng.config
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
 import io.github.resilience4j.retry.Retry
 import io.github.resilience4j.retry.RetryRegistry
 import org.artinus.backend.config.RestClientFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

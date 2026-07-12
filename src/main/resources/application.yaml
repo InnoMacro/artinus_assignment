@@ -81,9 +81,9 @@ resilience4j:
         enable-randomized-wait: true
         randomized-wait-factor: 0.5
         retry-exceptions:
-          - org.artinus.backend.subscription.adapter.outbound.csrng.CsrngUnavailableException
+          - org.artinus.backend.subscription.adapter.outbound.csrng.exception.CsrngUnavailableException
         ignore-exceptions:
-          - org.artinus.backend.subscription.adapter.outbound.csrng.CsrngInvalidResponseException
+          - org.artinus.backend.subscription.adapter.outbound.csrng.exception.CsrngInvalidResponseException
   circuitbreaker:
     instances:
       csrng:
@@ -95,9 +95,9 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 3
         automatic-transition-from-open-to-half-open-enabled: true
         record-exceptions:
-          - org.artinus.backend.subscription.adapter.outbound.csrng.CsrngUnavailableException
+          - org.artinus.backend.subscription.adapter.outbound.csrng.exception.CsrngUnavailableException
         ignore-exceptions:
-          - org.artinus.backend.subscription.adapter.outbound.csrng.CsrngInvalidResponseException
+          - org.artinus.backend.subscription.adapter.outbound.csrng.exception.CsrngInvalidResponseException
       subscriptionHistoryAi:
         sliding-window-type: COUNT_BASED
         sliding-window-size: 10

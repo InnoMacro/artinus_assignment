@@ -1,4 +1,4 @@
-package org.artinus.backend.subscription.adapter.outbound.csrng
+package org.artinus.backend.subscription.adapter.outbound.csrng.exception
 
 class CsrngInvalidResponseException(
     message: String,
