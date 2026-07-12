@@ -1,5 +1,7 @@
 package org.artinus.backend.subscription.domain
 
+import org.artinus.backend.subscription.domain.exception.InvalidPhoneNumberException
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -14,7 +16,7 @@ class PhoneNumberTest {
 
     @Test
     fun `유효하지 않은 휴대폰 번호는 생성할 수 없다`() {
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(InvalidPhoneNumberException::class.java) {
             PhoneNumber("02-123-4567")
         }
     }

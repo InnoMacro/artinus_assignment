@@ -1,14 +1,23 @@
 package org.artinus.backend.subscription.adapter.inbound.web
 
-import org.artinus.backend.common.error.ApiExceptionHandler
 import org.artinus.backend.channel.application.exception.ChannelNotFoundException
 import org.artinus.backend.channel.domain.ChannelId
+import org.artinus.backend.common.error.CommonApiExceptionHandler
+import org.artinus.backend.subscription.adapter.inbound.web.error.SubscriptionApiExceptionHandler
+import org.artinus.backend.subscription.application.exception.SubscriptionApprovalInvalidResponseException
+import org.artinus.backend.subscription.application.exception.SubscriptionApprovalUnavailableException
+import org.artinus.backend.subscription.application.exception.SubscriptionChangeConflictException
+import org.artinus.backend.subscription.application.port.inbound.GetSubscriptionHistoryUseCase
 import org.artinus.backend.subscription.application.port.inbound.SubscribeUseCase
 import org.artinus.backend.subscription.application.port.inbound.UnsubscribeUseCase
 import org.artinus.backend.subscription.application.result.ChangeSubscriptionResult
-import org.artinus.backend.subscription.domain.MemberId
-import org.artinus.backend.subscription.domain.PhoneNumber
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.application.result.SubscriptionHistoryItem
+import org.artinus.backend.subscription.application.result.SubscriptionHistoryResult
+import org.artinus.backend.subscription.application.result.SummarySource
+import org.artinus.backend.subscription.domain.vo.MemberId
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.SubscriptionAction
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,18 +28,20 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.Instant
 
 class SubscriptionControllerTest {
     private val subscribeUseCase = RecordingSubscribeUseCase()
     private val unsubscribeUseCase = RecordingUnsubscribeUseCase()
+    private val getHistoryUseCase = RecordingGetSubscriptionHistoryUseCase()
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
     fun setUp() {
-        val controller = SubscriptionController(subscribeUseCase, unsubscribeUseCase)
+        val controller = SubscriptionController(subscribeUseCase, unsubscribeUseCase, getHistoryUseCase)
         mockMvc =
             MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(ApiExceptionHandler())
+                .setControllerAdvice(CommonApiExceptionHandler(), SubscriptionApiExceptionHandler())
                 .build()
     }
 
@@ -67,6 +78,27 @@ class SubscriptionControllerTest {
     }
 
     @Test
+    fun `휴대폰 번호로 구독 이력과 요약을 조회한다`() {
+        mockMvc.perform(get("/api/v1/subscriptions/010-1234-5678/histories"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.history[0].channelName").value("홈페이지"))
+            .andExpect(jsonPath("$.history[0].action").value("SUBSCRIBE"))
+            .andExpect(jsonPath("$.history[0].previousStatus").value("NONE"))
+            .andExpect(jsonPath("$.history[0].changedStatus").value("BASIC"))
+            .andExpect(jsonPath("$.summary").value("홈페이지에서 일반 구독을 시작했습니다."))
+            .andExpect(jsonPath("$.summarySource").value("LLM"))
+
+        assertEquals("01012345678", getHistoryUseCase.lastPhoneNumber?.value)
+    }
+
+    @Test
+    fun `잘못된 휴대폰 번호로 이력을 조회하면 400 오류로 응답한다`() {
+        mockMvc.perform(get("/api/v1/subscriptions/02-123-4567/histories"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+    }
+
+    @Test
     fun `잘못된 휴대폰 번호는 400 오류로 응답한다`() {
         mockMvc.perform(
             post("/api/v1/subscriptions")
@@ -93,6 +125,51 @@ class SubscriptionControllerTest {
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.code").value("CHANNEL_NOT_FOUND"))
             .andExpect(jsonPath("$.message").value("채널을 찾을 수 없습니다. channelId=99"))
+    }
+
+    @Test
+    fun `subscription advice는 common catch-all보다 우선해 외부 승인 장애를 변환한다`() {
+        subscribeUseCase.failure = SubscriptionApprovalUnavailableException()
+
+        mockMvc.perform(
+            post("/api/v1/subscriptions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """{"phoneNumber":"01012345678","channelId":1,"targetStatus":"BASIC"}""",
+                ),
+        )
+            .andExpect(status().isServiceUnavailable)
+            .andExpect(jsonPath("$.code").value("CSRNG_UNAVAILABLE"))
+    }
+
+    @Test
+    fun `외부 승인 응답 오류는 502로 변환한다`() {
+        subscribeUseCase.failure = SubscriptionApprovalInvalidResponseException()
+
+        mockMvc.perform(
+            post("/api/v1/subscriptions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """{"phoneNumber":"01012345678","channelId":1,"targetStatus":"BASIC"}""",
+                ),
+        )
+            .andExpect(status().isBadGateway)
+            .andExpect(jsonPath("$.code").value("CSRNG_INVALID_RESPONSE"))
+    }
+
+    @Test
+    fun `구독 변경 충돌은 409로 변환한다`() {
+        subscribeUseCase.failure = SubscriptionChangeConflictException()
+
+        mockMvc.perform(
+            post("/api/v1/subscriptions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """{"phoneNumber":"01012345678","channelId":1,"targetStatus":"BASIC"}""",
+                ),
+        )
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.code").value("SUBSCRIPTION_CONFLICT"))
     }
 
     @Test
@@ -135,6 +212,29 @@ class SubscriptionControllerTest {
         override fun unsubscribe(command: org.artinus.backend.subscription.application.command.ChangeSubscriptionCommand): ChangeSubscriptionResult {
             lastTarget = command.targetStatus
             return result(command.targetStatus)
+        }
+    }
+
+    private class RecordingGetSubscriptionHistoryUseCase : GetSubscriptionHistoryUseCase {
+        var lastPhoneNumber: PhoneNumber? = null
+
+        override fun getHistory(phoneNumber: PhoneNumber): SubscriptionHistoryResult {
+            lastPhoneNumber = phoneNumber
+            return SubscriptionHistoryResult(
+                history =
+                    listOf(
+                        SubscriptionHistoryItem(
+                            id = 1,
+                            channelName = "홈페이지",
+                            action = SubscriptionAction.SUBSCRIBE,
+                            previousStatus = SubscriptionStatus.NONE,
+                            changedStatus = SubscriptionStatus.BASIC,
+                            changedAt = Instant.parse("2026-01-01T12:00:00Z"),
+                        ),
+                    ),
+                summary = "홈페이지에서 일반 구독을 시작했습니다.",
+                summarySource = SummarySource.LLM,
+            )
         }
     }
 

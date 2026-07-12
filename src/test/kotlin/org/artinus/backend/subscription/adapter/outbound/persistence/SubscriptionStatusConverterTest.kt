@@ -1,6 +1,6 @@
 package org.artinus.backend.subscription.adapter.outbound.persistence
 
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -17,7 +17,15 @@ class SubscriptionStatusConverterTest {
 
     @Test
     fun `tinyint 코드를 상태 Enum으로 복원한다`() {
+        assertEquals(SubscriptionStatus.NONE, converter.convertToEntityAttribute(0))
+        assertEquals(SubscriptionStatus.BASIC, converter.convertToEntityAttribute(1))
         assertEquals(SubscriptionStatus.PREMIUM, converter.convertToEntityAttribute(2))
+    }
+
+    @Test
+    fun `null은 null로 변환한다`() {
+        assertEquals(null, converter.convertToDatabaseColumn(null))
+        assertEquals(null, converter.convertToEntityAttribute(null))
     }
 
     @Test

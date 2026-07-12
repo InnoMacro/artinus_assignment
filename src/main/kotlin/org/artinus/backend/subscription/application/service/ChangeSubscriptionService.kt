@@ -1,86 +1,39 @@
 package org.artinus.backend.subscription.application.service
 
-import org.artinus.backend.channel.application.port.outbound.ChannelRepository
 import org.artinus.backend.subscription.application.command.ChangeSubscriptionCommand
+import org.artinus.backend.subscription.application.exception.SubscriptionApprovalRejectedException
 import org.artinus.backend.subscription.application.port.inbound.SubscribeUseCase
 import org.artinus.backend.subscription.application.port.inbound.UnsubscribeUseCase
 import org.artinus.backend.subscription.application.port.outbound.ApprovalDecision
 import org.artinus.backend.subscription.application.port.outbound.SubscriptionApprovalPort
-import org.artinus.backend.subscription.application.port.outbound.SubscriptionHistoryRepository
-import org.artinus.backend.subscription.application.port.outbound.SubscriptionMemberRepository
 import org.artinus.backend.subscription.application.result.ChangeSubscriptionResult
-import org.artinus.backend.subscription.domain.MemberId
-import org.artinus.backend.subscription.domain.SubscriptionChange
-import org.artinus.backend.subscription.domain.SubscriptionHistory
-import org.artinus.backend.subscription.domain.SubscriptionMember
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.Clock
-import java.time.Instant
 
 @Service
+@Transactional(propagation = Propagation.NEVER)
 class ChangeSubscriptionService(
-    private val memberRepository: SubscriptionMemberRepository,
-    private val historyRepository: SubscriptionHistoryRepository,
-    private val channelRepository: ChannelRepository,
+    private val preflightService: SubscriptionChangePreflightService,
+    private val transactionService: SubscriptionChangeTransactionService,
     private val approvalPort: SubscriptionApprovalPort,
-    private val clock: Clock,
 ) : SubscribeUseCase,
     UnsubscribeUseCase {
-    @Transactional
     override fun subscribe(command: ChangeSubscriptionCommand): ChangeSubscriptionResult {
-        val channel = channelRepository.getById(command.channelId)
-        channel.requireSubscribable()
-
-        val member =
-            memberRepository.findByPhoneNumberForUpdate(command.phoneNumber)
-                ?: SubscriptionMember.new(command.phoneNumber)
-        val change = member.subscribe(command.targetStatus)
-
-        return approveAndSave(member, command, change)
+        val preflight = preflightService.validateSubscribe(command)
+        requireApproval()
+        return transactionService.subscribe(command, preflight)
     }
 
-    @Transactional
     override fun unsubscribe(command: ChangeSubscriptionCommand): ChangeSubscriptionResult {
-        val channel = channelRepository.getById(command.channelId)
-        channel.requireUnsubscribable()
-
-        val member = memberRepository.getByPhoneNumberForUpdate(command.phoneNumber)
-        val change = member.unsubscribe(command.targetStatus)
-
-        return approveAndSave(member, command, change)
+        preflightService.validateUnsubscribe(command)
+        requireApproval()
+        return transactionService.unsubscribe(command)
     }
 
-    private fun approveAndSave(
-        member: SubscriptionMember,
-        command: ChangeSubscriptionCommand,
-        change: SubscriptionChange,
-    ): ChangeSubscriptionResult {
+    private fun requireApproval() {
         if (approvalPort.requestApproval() == ApprovalDecision.REJECTED) {
             throw SubscriptionApprovalRejectedException()
         }
-
-        val savedMember = memberRepository.save(member)
-        historyRepository.save(change.toHistory(requireNotNull(savedMember.id), command, clock.instant()))
-
-        return ChangeSubscriptionResult(
-            memberId = requireNotNull(savedMember.id),
-            phoneNumber = savedMember.phoneNumber,
-            status = savedMember.status,
-        )
     }
-
-    private fun SubscriptionChange.toHistory(
-        memberId: MemberId,
-        command: ChangeSubscriptionCommand,
-        changedAt: Instant,
-    ): SubscriptionHistory =
-        SubscriptionHistory(
-            memberId = memberId,
-            channelId = command.channelId,
-            action = action,
-            previousStatus = previousStatus,
-            changedStatus = changedStatus,
-            changedAt = changedAt,
-        )
 }

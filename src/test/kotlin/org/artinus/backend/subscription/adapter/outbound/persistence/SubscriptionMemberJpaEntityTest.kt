@@ -1,9 +1,9 @@
 package org.artinus.backend.subscription.adapter.outbound.persistence
 
-import org.artinus.backend.subscription.domain.MemberId
-import org.artinus.backend.subscription.domain.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.MemberId
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
 import org.artinus.backend.subscription.domain.SubscriptionMember
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

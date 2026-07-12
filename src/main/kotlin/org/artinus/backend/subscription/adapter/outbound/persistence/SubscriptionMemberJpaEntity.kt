@@ -7,10 +7,10 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import org.artinus.backend.subscription.domain.MemberId
-import org.artinus.backend.subscription.domain.PhoneNumber
+import org.artinus.backend.subscription.domain.vo.MemberId
+import org.artinus.backend.subscription.domain.vo.PhoneNumber
 import org.artinus.backend.subscription.domain.SubscriptionMember
-import org.artinus.backend.subscription.domain.SubscriptionStatus
+import org.artinus.backend.subscription.domain.vo.SubscriptionStatus
 
 @Entity
 @Table(name = "subscription_member")

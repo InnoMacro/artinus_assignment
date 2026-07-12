@@ -1,5 +1,7 @@
 package org.artinus.backend.channel.domain
 
+import org.artinus.backend.channel.domain.exception.ChannelActionNotAllowedException
+
 class Channel(
     val id: ChannelId,
     val code: String,

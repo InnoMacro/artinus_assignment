@@ -1,0 +1,14 @@
+package org.artinus.backend.subscription.adapter.outbound.ai.config
+
+enum class SubscriptionHistoryAiReasoningEffort {
+    NONE,
+    MINIMAL,
+    LOW,
+    MEDIUM,
+    HIGH,
+    XHIGH,
+    ;
+
+    val apiValue: String
+        get() = name.lowercase()
+}

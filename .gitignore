@@ -42,3 +42,10 @@ out/
 ### Local environment ###
 .env
 !.env.example
+
+### Local agent tooling ###
+AGENTS.md
+/.agents/
+/.claude/
+/.codex/
+.omc/
