@@ -27,7 +27,7 @@ docker compose up --build
 - API 문서(Swagger UI): http://localhost:8080/swagger-ui.html
 - 헬스체크: http://localhost:8080/actuator/health
 
-OpenAI 요약을 활성화하려면 `.env.example`을 참고해 `.env`에 다음 값을 설정한다()API Key는 레포지토리에 미포함)
+OpenAI 요약을 활성화하려면 `.env.example`을 참고해 `.env`에 다음 값을 설정한다(API Key는 레포지토리에 미포함)
 
 ```properties
 AI_CHAT_PROVIDER=openai
